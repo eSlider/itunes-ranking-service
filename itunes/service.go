@@ -12,9 +12,15 @@ import (
 type Service struct {
 }
 
+var connection *gorm.DB
+
 // GetConnection to database
 func (s *Service) GetConnection() (*gorm.DB, error) {
-	return gorm.Open(sqlite.Open("data/podcast.db"), &gorm.Config{})
+	var err error
+	if connection == nil {
+		connection, err = gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
+	}
+	return connection, err
 }
 
 // Load country entries
