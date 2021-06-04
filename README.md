@@ -24,7 +24,7 @@ go run main.go
 
 * [x] Erstelle einen [HTTP Server](main.go) mit den folgenden beiden Endpunkten in Golang:
 * [x] Der Endpunkt [/update](api/api.go) 
-    * [x] [lädt beim Aufruf die Liste der 100 populärsten Podcasts](itunes/service.go#35)  
+    * [x] [lädt beim Aufruf die Liste der 100 populärsten Podcasts](itunes/service.go#L35)  
     * [x] für [5 verschiedene Länder](itunes/country.go)
     * [x] und schreibt diese in geeigneter Form in eine Datenbank.
     * [x] Die 100 populärsten Podcasts lassen sich von iTunes über die folgende URL als JSON
