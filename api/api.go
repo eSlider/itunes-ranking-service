@@ -41,11 +41,17 @@ func GetUpdate(w http.ResponseWriter, r *http.Request) {
 
 // GetRankByITuneId and return as an list entries in each country
 func GetRankByITuneId(w http.ResponseWriter, r *http.Request) {
-	var pathPars = strings.Split(r.RequestURI, "/")
+	var headers = w.Header()
+	for k, v := range map[string]string{
+		"Content-Type":  "application/json; charset=UTF-8",
+		"Cache-Control": "no-store, max-age=0",
+	} {
+		headers.Set(k, v)
+	}
 
+	var pathPars = strings.Split(r.RequestURI, "/")
 	// Has ITuneId in the path?
 	if len(pathPars) < 3 {
-		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("[]"))
 		return
@@ -61,28 +67,43 @@ func GetRankByITuneId(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 
-	// Check if ID isn't
+	// Check if ID isn't:
+	// No need to communicate database
 	if id < 0 {
-		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("[]"))
+		_, err := w.Write([]byte("[]"))
+		if err != nil {
+			handleError(w, err)
+			return
+		}
 		return
 	}
 
-	entries, err := service.GetById(id)
+	// Sync before rank
+	if service.HasCacheDbConnection() {
+		_, err := service.Update()
+		if err != nil {
+			handleError(w, err)
+			return
+		}
+	}
+
+	entries, err := service.GetRankedEntriesByITuneId(id)
+	var result = service.GroupEntriesByCountry(entries)
+
 	if err != nil {
 		handleError(w, err)
 		return
 	}
 
-	js, err := json.Marshal(entries)
+	js, err := json.Marshal(result)
 
 	if err != nil {
 		handleError(w, err)
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	headers.Set("Content-Type", "application/json; charset=UTF-8")
 	_, err = w.Write(js)
 
 	if err != nil {

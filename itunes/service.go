@@ -9,21 +9,29 @@ import (
 	"gorm.io/gorm"
 )
 
+// Service client to use for sync and manage local data
+// and the place to contain project business-logic
 type Service struct {
 }
 
+// Share one connection between all service instances (singleton)
 var connection *gorm.DB
 
 // GetConnection to database
 func (s *Service) GetConnection() (*gorm.DB, error) {
 	var err error
-	if connection == nil {
+	if s.HasCacheDbConnection() {
 		connection, err = gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
 	}
 	return connection, err
 }
 
-// Load country entries
+// HasCacheDbConnection bzw. is there an database?
+func (s *Service) HasCacheDbConnection() bool {
+	return connection == nil
+}
+
+// Load country specified entries
 func (s *Service) Load(country Country, limit int) (*Podcast, error) {
 	var url = fmt.Sprintf("https://itunes.apple.com/%s/rss/topaudiopodcasts/limit=%d/json", country, limit)
 	var c, err = utils.LoadOverHttp(url)
@@ -53,7 +61,9 @@ func (s *Service) Load(country Country, limit int) (*Podcast, error) {
 	return pc, err
 }
 
-// Update country specified top entries
+// Update country specified top entries from official sources
+// Clean's entries table before update
+// TODO: improve with incremental update?
 func (s *Service) Update() (map[Country]*Podcast, error) {
 	var limit = 100
 	var db, err = s.GetConnection()
@@ -93,22 +103,25 @@ func (s *Service) Update() (map[Country]*Podcast, error) {
 	return podcasts, nil
 }
 
-func (s *Service) GetById(id uint64) (*map[string]uint, error) {
+// GetRankedEntriesByITuneId ordered by land as an `map[(string)land-string](uint)ranking-position-number
+// Example: {es:2}
+func (s *Service) GetRankedEntriesByITuneId(id uint64) (*[]EntryRankedResult, error) {
 	var db, err = s.GetConnection()
-
 	if err != nil {
 		return nil, err
 	}
 
 	// Get results from db
-	var entries []RankResult
+	var entries []EntryRankedResult
 	db.Table("entries").Where("i_tune_id = ?", []uint64{id}).Find(&entries)
+	return &entries, err
+}
 
-	// Group results by country
-	var countryResult = map[string]uint{}
-	for _, entry := range entries {
-		countryResult[entry.Country] = entry.Position
+// GroupEntriesByCountry as result
+func (s *Service) GroupEntriesByCountry(entries *[]EntryRankedResult) *map[string]uint {
+	var countryResult = &map[string]uint{}
+	for _, entry := range *entries {
+		(*countryResult)[entry.Country] = entry.Position
 	}
-
-	return &countryResult, err
+	return countryResult
 }

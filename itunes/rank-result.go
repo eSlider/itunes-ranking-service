@@ -1,6 +1,6 @@
 package itunes
 
-type RankResult struct {
+type EntryRankedResult struct {
 	Id       uint
 	Title    string
 	Artist   string
