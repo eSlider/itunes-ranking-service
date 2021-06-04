@@ -1,24 +1,24 @@
 # iTunes Ranking Service
 
-Go API Server REST HTTP service to get top 100 and rank iTunes entries(positions).
+Go API Server REST HTTP service to get top 100 and iTunes entries.
 
 ## Usage
+
+### Build the server
+
+```shell
+bin/build-as-docker.sh
+```
+
+> Please install [docker-compose](https://docs.docker.com/compose/) to build and manage the service containerized in docker.
 
 ### Running the server
 
 To run the server, follow these simple steps:
 
-```
+```shell
 go run main.go
 ```
-
-### Build the server
-
-- [bin/build.sh](bin/build.sh) Golang service build script. Natively works on linux plattform only
-- [bin/build-docker.sh](bin/build-as-docker.sh) Contained build script for docker
-  using [docker-compose](https://docs.docker.com/compose/) managing tool
-
-> Please install [docker-compose](https://docs.docker.com/compose/) to build and manage the service containerized in  docker.
 
 ## TODO:
 
