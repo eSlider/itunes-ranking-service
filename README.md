@@ -1,6 +1,6 @@
 # iTunes Ranking Service
 
-Go API Server REST HTTP service to get top 100 and iTunes entries.
+Go API Server REST HTTP service to get land specific rank of top entries.
 
 ## Usage
 
