@@ -36,13 +36,16 @@ go run main.go
         * [x] Frankreich (fr)
         * [x] Italien (it)
         * [x] und Spanien (es)
-    * [x] Die Datenbank sollte entweder MySQL, Postgres oder `SQLite` sein
+    * [x] Die Datenbank sollte entweder
+      * [x] MySQL, 
+      * [x] Postgres
+      * [x] oder [SQLite](itunes/service.go#L24) sein
 * [x] Der Endpunkt [/rank](api/api.go) 
-  * [x] Erfordert die `iTunesID` als Eingabe-Parameter 
-  * [x] und liefert eine Liste von Land/Position-Tupeln zurück
-  * [x] In dem Tupel ist das Land der `Country Code` 
-  * [x] und die `Position` ist die `Position` innerhalb der Top-100
-  * [x] Die Server-Antwort soll mithilfe der Daten aus der Datenbank erstellt werden
+  * [x] [Erfordert](api/api.go#L54) die `iTunesID` als Eingabe-Parameter 
+  * [x] und [liefert eine Liste von Land/Position-Tupeln](api/api.go#L91) zurück
+  * [x] [In dem Tupel ist das Land](itunes/service.go#L124) der `Country Code` 
+  * [x] und die `Position` ist die [Position](itunes/rank-result.go) innerhalb der Top-100
+  * [x] Die Server-Antwort [soll mithilfe der Daten aus der Datenbank](itunes/service.go#L116) erstellt werden
   * [x] Ist die `iTunesID` unbekannt, so soll eine leere Liste zurückgegeben werden
   * [x] Die Antwort soll [als JSON](api/api.go) zurückgegeben werden
 * [x] Der Server soll als [Docker-Image](bin/build-as-docker.sh) ausgeliefert werden, d.h. ein entsprechendes [Dockerfile](Dockerfile) soll vorhanden sein. 
