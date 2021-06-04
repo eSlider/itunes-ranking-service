@@ -1,0 +1,38 @@
+openapi: 3.0.1
+info:
+  title: iTunes Ranking Service
+  description: Service in Golang
+  version: '0.1'
+
+paths:
+  /update:
+    get:
+      description: |
+        When called, loads the list of the 100 most popular podcasts
+        for 5 different countries and writes them in a suitable form in a database.
+      responses:
+        '200':
+          description: Shows database writes stastics
+  /rank/{iTuneId}:
+    get:
+      description: |
+        The endpoint `rank` requires the iTunesID as input parameter
+      responses:
+        '200':
+          description: |
+            List of Land/Position tuples
+            * In the tuple the country is the `Country Code` and the` Position` is the `Position` within the top 100
+            * If the iTunes ID is unknown, an empty list should be returned
+      parameters:
+        - in: path
+          name: iTuneId
+          style: simple
+          explode: false
+          required: true
+          schema:
+            type: integer
+            description: Numeric iTunes ID
+servers:
+  - url: /
+components: { }
+

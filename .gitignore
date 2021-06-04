@@ -1,0 +1,10 @@
+# IntelliJ IDEA
+.idea/
+*.iml
+
+# Binarey
+itunes-ranking-service
+
+# Generated data
+gen
+data

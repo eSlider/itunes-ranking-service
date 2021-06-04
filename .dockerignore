@@ -1,0 +1,12 @@
+# Ignore hidden files
+.*
+
+# IDEA project IML
+*.iml
+
+# Documentation (proviso)
+README.md
+
+# Binary
+itunes-ranking-service
+

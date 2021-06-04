@@ -1,0 +1,6 @@
+version: "3"
+services:
+  itunes-ranking-service:
+    build: .
+    ports:
+      - "8080:8080"
