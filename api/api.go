@@ -59,6 +59,8 @@ func GetRankByITuneId(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.WriteHeader(http.StatusOK)
+
 	// Check if ID isn't
 	if id < 0 {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
@@ -80,14 +82,13 @@ func GetRankByITuneId(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	_, err = w.Write(js)
 
 	if err != nil {
 		handleError(w, err)
 		return
 	}
-
-	w.WriteHeader(http.StatusOK)
 }
 
 // Handle error
