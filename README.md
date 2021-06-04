@@ -4,7 +4,7 @@ Go API Server REST HTTP service to get top 100 and iTunes entries.
 
 ## Usage
 
-### Build the server
+### Build and run the server
 
 ```shell
 bin/build-as-docker.sh
@@ -23,10 +23,10 @@ go run main.go
 ## TODO:
 
 * [x] Erstelle einen [HTTP Server](main.go) mit den folgenden beiden Endpunkten in Golang:
-* [x] Der Endpunkt [/update](api/routers.go#L45) 
+* [x] Der Endpunkt [/ENV ](api/routers.go#L45) 
     * [x] [lädt beim Aufruf die Liste der 100 populärsten Podcasts](itunes/service.go#L35)  
     * [x] für [5 verschiedene Länder](itunes/country.go#L5)
-    * [x] und[ schreibt diese in geeigneter Form in eine Datenbank](itunes/service.go#L95).
+    * [x] und [schreibt diese in geeigneter Form in eine Datenbank](itunes/service.go#L95).
     * [x] Die 100 populärsten Podcasts lassen sich von iTunes über die folgende URL als JSON
       abrufen: `https://itunes.apple.com/{cc}/rss/topaudiopodcasts/limit=100/json` (`{cc}` = Country Code)
     * [x] Die iTunesID ist im JSON unter dem Pfad [feed](itunes/feed.go) > [entry](itunes/entry.go) > [id > attribute > im:id](itunes/id.go)` zu finden
