@@ -103,7 +103,6 @@ func GetRankByITuneId(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	headers.Set("Content-Type", "application/json; charset=UTF-8")
 	_, err = w.Write(js)
 
 	if err != nil {
