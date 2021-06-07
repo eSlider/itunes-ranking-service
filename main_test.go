@@ -59,9 +59,10 @@ func TestUnmarshalPodcast(t *testing.T) {
 	}
 
 	// Save to database
-	for _, entry = range pc.Feed.Entries {
+	for position, entry := range pc.Feed.Entries {
 		//entry.ID = entry.ITuneId.Uint()
 		entry.Country = itunes.Deutschland
+		entry.Position = position + 1
 		db.Create(&entry)
 	}
 }
