@@ -13,5 +13,5 @@ type Category struct {
 }
 
 func (c Category) Value() (driver.Value, error) {
-	return c.Id.Uint(), nil
+	return c.Id.Uint()
 }

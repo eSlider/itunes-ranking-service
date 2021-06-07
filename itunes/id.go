@@ -2,7 +2,6 @@ package itunes
 
 import (
 	"database/sql/driver"
-	"log"
 	"strconv"
 )
 
@@ -18,17 +17,13 @@ type Id struct {
 
 // Value Implement Valuer
 func (i Id) Value() (driver.Value, error) {
-	return i.Uint(), nil
+	return i.Uint()
 }
 
-func (i Id) Uint() int64 {
+// Uint ID as int64
+func (i Id) Uint() (int64, error) {
 	if i.Attributes.Id == "" {
-		return 0
+		return 0, nil
 	}
-
-	id, err := strconv.ParseInt(i.Attributes.Id, 10, 32)
-	if err != nil {
-		log.Printf(err.Error())
-	}
-	return id
+	return strconv.ParseInt(i.Attributes.Id, 10, 32)
 }
