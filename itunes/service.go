@@ -51,10 +51,8 @@ func (s *Service) Load(country Country, limit int) (*Podcast, error) {
 		return nil, err
 	}
 
-	var position = 0
-	for _, entry := range pc.Feed.Entries {
-		position++
-		entry.Position = position
+	for position, entry := range pc.Feed.Entries {
+		entry.Position = position + 1
 		entry.Country = country
 	}
 
