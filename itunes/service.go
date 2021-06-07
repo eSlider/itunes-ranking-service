@@ -77,7 +77,7 @@ func (s *Service) Update() (map[Country]*Podcast, error) {
 	err = db.AutoMigrate(entry)
 
 	// Clean up
-	db.Exec("DELETE FROM entries")
+	s.DeleteAll(db)
 
 	var podcasts = map[Country]*Podcast{}
 
@@ -96,6 +96,11 @@ func (s *Service) Update() (map[Country]*Podcast, error) {
 		podcasts[country] = pc
 	}
 	return podcasts, nil
+}
+
+// DeleteAll entries
+func (s *Service) DeleteAll(db *gorm.DB) *gorm.DB {
+	return db.Exec("DELETE FROM entries")
 }
 
 // GetRankedEntriesByITuneId ordered by land as an `map[(string)land-string](uint)ranking-position-number
