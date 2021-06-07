@@ -7,6 +7,8 @@ import (
 	"github.com/eSlider/itunes-ranking-service/utils"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	"log"
+	"sync"
 )
 
 func NewService() *Service {
@@ -81,23 +83,37 @@ func (s *Service) Update() (map[Country]*Podcast, error) {
 	// Migrate the schema
 	err = db.AutoMigrate(entry)
 
+	var podcasts = map[Country]*Podcast{}
+	var wg sync.WaitGroup
+
+	// Load async over all countries
+	for _, country := range Countries {
+		wg.Add(1)
+		go func(country Country) {
+			defer wg.Done()
+			var pc, err = s.Load(country, limit)
+			if err != nil {
+				panic(err)
+			}
+			podcasts[country] = pc
+			log.Printf("Loaded %s country with %d entries\n", country, len(pc.Feed.Entries))
+		}(country)
+	}
+
+	// Wait for all
+	wg.Wait()
+
 	// Clean up
 	s.DeleteAll(db)
 
-	var podcasts = map[Country]*Podcast{}
-
-	// Get over all countries
-	for _, country := range Countries {
-		future := utils.Exec(func() interface{} {
-			var pc, _ = s.Load(country, limit)
-			for _, entry := range pc.Feed.Entries {
-				db.Create(&entry)
-			}
-			podcasts[country] = pc
-			return pc
-		})
-		future.Await()
+	// Update entries
+	for _, podcast := range podcasts {
+		for _, entry := range podcast.Feed.Entries {
+			db.Create(&entry)
+		}
 	}
+
+	log.Println("all")
 	return podcasts, nil
 }
 
