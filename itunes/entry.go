@@ -8,17 +8,17 @@ type Entry struct {
 	//CreatedAt int64  `gorm:"autoCreateTime"` // Use unix seconds as creating time
 
 	ITuneId Id              `json:"id,omitempty"`
-	Title   *LabelContainer `json:"title,omitempty"`
-	Summary *LabelContainer `json:"summary,omitempty"`
-	Name    *LabelContainer `json:"im:name,omitempty"`
-	Rights  *LabelContainer `json:"rights,omitempty"`
-	Artist  *Artist         `json:"im:artist,omitempty"`
-	Price   *Price          `json:"im:price,omitempty"`
-	Link    *link.Link      `json:"link,omitempty"`
+	Title   *LabelContainer `json:"title,omitempty" gorm:"-"`
+	Summary *LabelContainer `json:"summary,omitempty" gorm:"-"`
+	Name    *LabelContainer `json:"im:name,omitempty" gorm:"-"`
+	Rights  *LabelContainer `json:"rights,omitempty" gorm:"-"`
+	Artist  *Artist         `json:"im:artist,omitempty" gorm:"-"`
+	Price   *Price          `json:"im:price,omitempty" gorm:"-"`
+	Link    *link.Link      `json:"link,omitempty" gorm:"-"`
 
-	ReleasedAt  *TimeStamp   `json:"im:releaseDate,omitempty"`
-	Category    *Category    `json:"category,omitempty"`
-	ContentType *ContentType `json:"im:contentType,omitempty"`
+	ReleasedAt  *TimeStamp   `json:"im:releaseDate,omitempty" gorm:"-"`
+	Category    *Category    `json:"category,omitempty" gorm:"-"`
+	ContentType *ContentType `json:"im:contentType,omitempty" gorm:"-"`
 
 	Images []Image `json:"im:image,omitempty" gorm:"-"`
 
