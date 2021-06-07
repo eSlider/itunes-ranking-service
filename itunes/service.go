@@ -69,7 +69,7 @@ func (s *Service) Load(country Country, limit int) (*Podcast, error) {
 // Update country specified top entries from official sources
 // Clean's entries table before update
 // TODO: improve with incremental update?
-func (s *Service) Update() (map[Country]*Podcast, error) {
+func (s *Service) Update() (*map[Country]*Podcast, error) {
 	var limit = 100
 	var db, err = s.GetConnection()
 	//var path = "data/%s.json"
@@ -78,13 +78,47 @@ func (s *Service) Update() (map[Country]*Podcast, error) {
 		return nil, err
 	}
 
-	var entry = &Entry{}
+	// Load new entries
+	podcasts, _errors := s.LoadAll(limit)
+
+	// Handle errors
+	// TODO: implement global error handler
+	if len(_errors) > 0 {
+		jsb, _ := json.Marshal(_errors)
+		return podcasts, errors.New(string(jsb))
+	}
+
+	// Start transaction
+	//db.Begin()
 
 	// Migrate the schema
+	var entry = &Entry{}
 	err = db.AutoMigrate(entry)
+	if err != nil {
+		return nil, err
+	}
 
+	// Clean up
+	s.DeleteAll(db)
+
+	// Update podcasts
+	for _, podcast := range *podcasts {
+		for _, entry := range podcast.Feed.Entries {
+			db.Create(&entry)
+		}
+	}
+
+	// Commit transaction
+	//db.Commit()
+
+	return podcasts, nil
+}
+
+// LoadAll podcasts with a wait group
+func (s *Service) LoadAll(limit int) (*map[Country]*Podcast, []error) {
 	var podcasts = map[Country]*Podcast{}
 	var wg sync.WaitGroup
+	var _errors []error
 
 	// Load async over all countries
 	for _, country := range Countries {
@@ -93,7 +127,8 @@ func (s *Service) Update() (map[Country]*Podcast, error) {
 			defer wg.Done()
 			var pc, err = s.Load(country, limit)
 			if err != nil {
-				panic(err)
+				_errors = append(_errors, err)
+				return
 			}
 			podcasts[country] = pc
 			log.Printf("Loaded %s country with %d entries\n", country, len(pc.Feed.Entries))
@@ -103,18 +138,7 @@ func (s *Service) Update() (map[Country]*Podcast, error) {
 	// Wait for all
 	wg.Wait()
 
-	// Clean up
-	s.DeleteAll(db)
-
-	// Update entries
-	for _, podcast := range podcasts {
-		for _, entry := range podcast.Feed.Entries {
-			db.Create(&entry)
-		}
-	}
-
-	log.Println("all")
-	return podcasts, nil
+	return &podcasts, _errors
 }
 
 // DeleteAll entries
