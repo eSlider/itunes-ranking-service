@@ -9,6 +9,11 @@ import (
 	"gorm.io/gorm"
 )
 
+func NewService() *Service {
+	s := new(Service)
+	return s
+}
+
 // Service client to use for sync and manage local data
 // and the place to contain project business-logic
 type Service struct {
@@ -83,17 +88,15 @@ func (s *Service) Update() (map[Country]*Podcast, error) {
 
 	// Get over all countries
 	for _, country := range Countries {
-		var pc, err = s.Load(country, limit)
-
-		if err != nil {
-			return nil, err
-		}
-
-		for _, entry := range pc.Feed.Entries {
-			db.Create(&entry)
-		}
-
-		podcasts[country] = pc
+		future := utils.Exec(func() interface{} {
+			var pc, _ = s.Load(country, limit)
+			for _, entry := range pc.Feed.Entries {
+				db.Create(&entry)
+			}
+			podcasts[country] = pc
+			return pc
+		})
+		future.Await()
 	}
 	return podcasts, nil
 }
