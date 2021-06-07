@@ -89,10 +89,7 @@ func (s *Service) Update() (map[Country]*Podcast, error) {
 			return nil, err
 		}
 
-		var position = 0
 		for _, entry := range pc.Feed.Entries {
-			position++
-			entry.Position = position
 			db.Create(&entry)
 		}
 
