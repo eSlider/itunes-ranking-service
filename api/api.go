@@ -35,8 +35,6 @@ func GetUpdate(w http.ResponseWriter, r *http.Request) {
 		handleError(w, err)
 		return
 	}
-
-	w.WriteHeader(http.StatusOK)
 }
 
 // GetRankByITuneId and return as an list entries in each country
