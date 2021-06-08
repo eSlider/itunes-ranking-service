@@ -8,6 +8,7 @@ import (
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"log"
+	"net/url"
 	"sync"
 )
 
@@ -27,15 +28,39 @@ var connection *gorm.DB
 // GetConnection to database
 func (s *Service) GetConnection() (*gorm.DB, error) {
 	var err error
-	if s.HasCacheDbConnection() {
-		connection, err = gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
+	if !s.HasCacheDbConnection() {
+
+		var params = url.Values{}
+
+		// Prevents any timeouts
+		params.Add("_timeout", "0")
+
+		// If shared-cache mode is enabled and a thread establishes multiple connections to the same database,
+		// the connections share a single data and schema cache.
+		// This can significantly reduce the quantity of memory and IO required by the system.
+		params.Add("cache", "shared")
+
+		// With synchronous OFF (0), SQLite continues without syncing as soon as
+		// it has handed data off to the operating system.
+		// If the application running SQLite crashes, the data will be safe,
+		// but the database might become corrupted if the operating system crashes
+		// or the computer loses power before that data has been written to the disk surface.
+		// On the other hand, commits can be orders of magnitude faster with synchronous OFF.
+		params.Add("_sync", "OFF")
+
+		// No need to optimize database storage every time it's changes
+		params.Add("_vacuum", "0")
+
+		//params.Add("journal", "OFF")
+
+		connection, err = gorm.Open(sqlite.Open(":memory:?"+params.Encode()), &gorm.Config{})
 	}
 	return connection, err
 }
 
 // HasCacheDbConnection bzw. is there an database?
 func (s *Service) HasCacheDbConnection() bool {
-	return connection == nil
+	return connection != nil
 }
 
 // Load country specified entries
@@ -89,27 +114,28 @@ func (s *Service) Update() (*map[Country]*Podcast, error) {
 	}
 
 	// Start transaction
-	//db.Begin()
+	var tx = db.Begin()
 
 	// Migrate the schema
 	var entry = &Entry{}
-	err = db.AutoMigrate(entry)
+	err = tx.AutoMigrate(entry)
+
 	if err != nil {
 		return nil, err
 	}
 
 	// Clean up
-	s.DeleteAll(db)
+	s.DeleteAll(tx)
 
 	// Update podcasts
 	for _, podcast := range *podcasts {
 		for _, entry := range podcast.Feed.Entries {
-			db.Create(&entry)
+			tx.Create(&entry)
 		}
 	}
 
 	// Commit transaction
-	//db.Commit()
+	tx.Commit()
 
 	return podcasts, nil
 }

@@ -78,7 +78,7 @@ func GetRankByITuneId(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Sync before rank
-	if service.HasCacheDbConnection() {
+	if !service.HasCacheDbConnection() {
 		_, err := service.Update()
 		if err != nil {
 			handleError(w, err)
