@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"crypto/tls"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -15,6 +16,7 @@ func ReadFile(path string) (*[]byte, error) {
 
 // LoadOverHttp and return content
 func LoadOverHttp(url string) (*[]byte, error) {
+	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 	r, err := http.Get(url)
 	if err != nil {
 		return nil, err
