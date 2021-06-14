@@ -50,3 +50,8 @@ go run main.go
   * [x] Die Antwort soll [als JSON](api/api.go#L46) zurückgegeben werden
 * [x] Der Server soll als [Docker-Image](bin/build-as-docker.sh) ausgeliefert werden, d.h. ein entsprechendes [Dockerfile](Dockerfile) soll vorhanden sein. 
 * [x] Die Integration in [eine CI/CD](.github/workflows/go.yml) ist nicht notwendig.
+
+
+## Links
+
+* [Swagger API](https://app.swaggerhub.com/apis/eSlider/itunes-ranking-service/0.1#/default/get_rank__countryCode___iTuneId_)
