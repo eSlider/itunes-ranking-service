@@ -20,10 +20,8 @@ func NewService() *Service {
 // Service client to use for sync and manage local data
 // and the place to contain project business-logic
 type Service struct {
+	connection *gorm.DB
 }
-
-// Share one connection between all service instances (singleton)
-var connection *gorm.DB
 
 // GetConnection to database
 func (s *Service) GetConnection() (*gorm.DB, error) {
@@ -53,14 +51,14 @@ func (s *Service) GetConnection() (*gorm.DB, error) {
 
 		//params.Add("journal", "OFF")
 
-		connection, err = gorm.Open(sqlite.Open(":memory:?"+params.Encode()), &gorm.Config{})
+		s.connection, err = gorm.Open(sqlite.Open(":memory:?"+params.Encode()), &gorm.Config{})
 	}
-	return connection, err
+	return s.connection, err
 }
 
 // HasCacheDbConnection bzw. is there an database?
 func (s *Service) HasCacheDbConnection() bool {
-	return connection != nil
+	return s.connection != nil
 }
 
 // Load country specified entries

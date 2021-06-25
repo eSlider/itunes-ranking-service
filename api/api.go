@@ -1,9 +1,7 @@
 package api
 
 import (
-	"encoding/json"
 	"github.com/eSlider/itunes-ranking-service/itunes"
-	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -11,111 +9,54 @@ import (
 
 var service = &itunes.Service{}
 
-// GetUpdate database by getting land specified top 100 entries
-func GetUpdate(w http.ResponseWriter, r *http.Request) {
-	var podcasts, err = service.Update()
+type controlMethodRegister map[string]func(p *PathMethod, r *http.Request) interface{}
 
-	if err != nil {
-		handleError(w, err)
-		return
-	}
+var methods = controlMethodRegister{
 
-	// TODO: return better statics
-	js, err := json.Marshal(podcasts)
-
-	if err != nil {
-		handleError(w, err)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	_, err = w.Write(js)
-
-	if err != nil {
-		handleError(w, err)
-		return
-	}
-}
-
-// GetRankByITuneId and return as an list entries in each country
-func GetRankByITuneId(w http.ResponseWriter, r *http.Request) {
-	var headers = w.Header()
-	for k, v := range map[string]string{
-		"Content-Type":  "application/json; charset=UTF-8",
-		"Cache-Control": "no-store, max-age=0",
-	} {
-		headers.Set(k, v)
-	}
-
-	var pathPars = strings.Split(r.RequestURI, "/")
-	// Has ITuneId in the path?
-	if len(pathPars) < 3 {
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("[]"))
-		return
-	}
-
-	// Check if ID isn't number
-	var id, err = strconv.ParseUint(pathPars[2], 10, 32)
-	if err != nil {
-		handleError(w, err)
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	w.WriteHeader(http.StatusOK)
-
-	// Check if ID isn't:
-	// No need to communicate database
-	if id < 0 {
-		w.WriteHeader(http.StatusOK)
-		_, err := w.Write([]byte("[]"))
+	// GetUpdates database by getting land specified top 100 entries
+	"GetUpdates": func(p *PathMethod, r *http.Request) interface{} {
+		var podcasts, err = service.Update()
 		if err != nil {
-			handleError(w, err)
-			return
+			return err
 		}
-		return
-	}
+		return podcasts
+	},
 
-	// Sync before rank
-	if !service.HasCacheDbConnection() {
-		_, err := service.Update()
+	// GetRankByITuneId and return as an list entries in each country
+	"GetRankiTuneId": func(p *PathMethod, r *http.Request) interface{} {
+		var pathPars = strings.Split(r.RequestURI, "/")
+
+		// Has ITuneId in the path?
+		if len(pathPars) < 3 {
+			return []string{}
+		}
+
+		// Check if ID isn't number
+		var id, err = strconv.ParseUint(pathPars[2], 10, 32)
 		if err != nil {
-			handleError(w, err)
-			return
+			return err
 		}
-	}
 
-	entries, err := service.GetRankedEntriesByITuneId(id)
-	var result = service.GroupEntriesByCountry(entries)
+		// Check if ID isn't:
+		// No need to communicate database
+		if id < 0 {
+			return []string{}
+		}
 
-	if err != nil {
-		handleError(w, err)
-		return
-	}
+		// Sync before rank
+		if !service.HasCacheDbConnection() {
+			_, err := service.Update()
+			if err != nil {
+				return err
+			}
+		}
 
-	js, err := json.Marshal(result)
+		entries, err := service.GetRankedEntriesByITuneId(id)
 
-	if err != nil {
-		handleError(w, err)
-		return
-	}
+		if err != nil {
+			return err
+		}
 
-	_, err = w.Write(js)
-
-	if err != nil {
-		handleError(w, err)
-		return
-	}
-}
-
-// Handle error
-func handleError(w http.ResponseWriter, err error) {
-	log.Printf(err.Error())
-	_, err = w.Write([]byte(err.Error()))
-	if err != nil {
-		log.Printf(err.Error())
-		w.Write([]byte("," + err.Error()))
-	}
-	w.WriteHeader(http.StatusInternalServerError)
+		return service.GroupEntriesByCountry(entries)
+	},
 }
