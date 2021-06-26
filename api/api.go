@@ -14,7 +14,7 @@ type controlMethodRegister map[string]func(p *PathMethod, r *http.Request) inter
 var methods = controlMethodRegister{
 
 	// GetUpdates database by getting land specified top 100 entries
-	"GetUpdates": func(p *PathMethod, r *http.Request) interface{} {
+	"GetUpdate": func(p *PathMethod, r *http.Request) interface{} {
 		var podcasts, err = service.Update()
 		if err != nil {
 			return err
