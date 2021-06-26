@@ -77,8 +77,23 @@ func (s *Service) Start() *Service {
 			var funcName = strings.Title(methodName) + strings.Title(re.ReplaceAllString(pattern, ""))
 			var handlerFunc = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				var headers = w.Header()
+
+				// Enable CORS
 				for k, v := range map[string]string{
-					"Content-Type":  "application/json; charset=UTF-8",
+					"Access-Control-Allow-Origin":  "*",
+					"Access-Control-Allow-Headers": "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization",
+					"Access-Control-Allow-Methods": "POST, GET, OPTIONS, PUT, DELETE",
+				} {
+					headers.Set(k, v)
+				}
+				if r.Method == "OPTIONS" {
+					return
+				}
+
+				for k, v := range map[string]string{
+					// Enable JSON response
+					"Content-Type": "application/json; charset=UTF-8",
+					//Disable caching
 					"Cache-Control": "no-store, max-age=0",
 				} {
 					headers.Set(k, v)

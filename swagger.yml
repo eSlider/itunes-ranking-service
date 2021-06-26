@@ -2,7 +2,7 @@ openapi: 3.0.1
 info:
   title: iTunes Ranking Service
   description: Service in Golang
-  version: '0.1'
+  version: '0.2'
 
 paths:
   /update:
@@ -26,6 +26,7 @@ paths:
       parameters:
         - in: path
           name: iTuneId
+          example: 1450994021
           style: simple
           explode: false
           required: true
@@ -33,6 +34,6 @@ paths:
             type: integer
             description: Numeric iTunes ID
 servers:
-  - url: /
+  - url: http://localhost:8080/
 components: { }
 
